@@ -11,6 +11,10 @@
 (defui app []
   ($ :div
      ($ :h1 "ppap bbab")
+     ($ :<> "empty component?") ; = <>empty component</> in JSX
+     ;; <>empty component</> -> "empty component"
+     ;; <div>empty component<div/> -> <div>"empty component"</div>
+     ;; https://stackoverflow.com/questions/69019264/difference-between-and-div
      ($ my-button)))
 
 ;;
@@ -21,4 +25,5 @@
   (uix.dom/render-root ($ app) root))
 
 (defn ^:export init [] ;; export, but default?
+  ;; https://javascript.info/import-export
   (render))
