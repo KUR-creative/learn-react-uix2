@@ -19,6 +19,10 @@
     ($ :button {:on-click #(set-cnt! (inc cnt))} ;(.. % -target -value)
        (str "clicked " cnt " times"))))
 
+(defui clicked-btn [{:keys [on-click cnt]}]
+  ($ :button {:on-click on-click}
+     (str "clicked " cnt " times")))
+
 #_(defui resp-btn [{:keys [on-click children]}])
 
 (defui app []
@@ -36,8 +40,14 @@
        ($ :button {:on-click #(js/console.log "without defui")}
           "without defui")
        ($ :p
+          "Seperated state "
           ($ s-btn)
-          ($ s-btn)))))
+          ($ s-btn))
+       (let [[cnt set-cnt!] (uix/use-state 0)]
+         ($ :p
+            "Shared state "
+            ($ clicked-btn {:cnt cnt :on-click #(set-cnt! (inc cnt))})
+            ($ clicked-btn {:cnt cnt :on-click #(set-cnt! (inc cnt))}))))))
 ;(js/alert "clicked")
 
 ;;
