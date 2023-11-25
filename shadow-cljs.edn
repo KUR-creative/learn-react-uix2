@@ -2,7 +2,8 @@
  :dev-http {8080 "public"}
  :builds {:app
           {:target :browser
-           :modules {:main {:entries [app.core]
+           :modules {:main {:entries [app.ttt]
                             ;:init-fn app.core/init
-                            :init-fn app.qstart/init}}
+                            ;:init-fn app.qstart/init
+                            :init-fn app.ttt/init}}
            :devtools {:preloads [preload devtools.preload]}}}}
