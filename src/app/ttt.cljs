@@ -44,10 +44,18 @@
              (map-indexed (fn [idx tds]
                             ($ :tr {:key idx} tds)))))))
 
+(defui step-li [{:keys [move-no]}]
+  ($ :li {:key move-no}
+     ($ :button (str "Go to " (if (zero? move-no)
+                                "empty board"
+                                (str "move #" move-no))))))
+
 (defui moves-list [{:keys [moves]}]
   ($ :ol
-     (map #($ :li {:key %}
-              ($ :button %)) moves)))
+     (cons ($ step-li {:key -1 :move-no 0})
+           (map-indexed (fn [move-no move]
+                          ($ step-li {:key move :move-no (inc move-no)}))
+                        moves))))
 
 (defui game-status [{:keys [turn]}]
   ;; Add who win
