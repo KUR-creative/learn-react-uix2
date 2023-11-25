@@ -35,12 +35,14 @@
 
 (defui board-table [{:keys [state]}]
   ($ :table {:style {:border-collapse "collapse"}}
-     (->> (:board state)
-          (map-indexed (fn [idx ox]
-                         ($ cell {:ox ox :pos idx :state state
-                                  :key idx})))
-          (partition 3)
-          (map #($ :tr %)))))
+     ($ :tbody
+        (->> (:board state)
+             (map-indexed (fn [idx ox]
+                            ($ cell {:ox ox :pos idx :state state
+                                     :key idx})))
+             (partition 3)
+             (map-indexed (fn [idx tds]
+                            ($ :tr {:key idx} tds)))))))
 
 (defui moves-list [{:keys [moves]}]
   ($ :ol
