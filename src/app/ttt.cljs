@@ -12,23 +12,15 @@
        "_")))
 
 (defui app []
-  #_($ :table
-       ($ :tr ($ :td 1) ($ :td "x") ($ :td "o"))
-       ($ :tr ($ :td 4) ($ :td 5) ($ :td 6))
-       ($ :tr ($ :td 7) ($ :td 8) ($ :td 9)))
-  ($ :div
-     ($ :table {:style {:border-collapse "collapse"
-                     ;:width "50%"
-                        }}
-        ($ :tr ($ cell) ($ cell) ($ cell))
-        ($ :tr ($ cell) ($ cell) ($ cell))
-        ($ :tr ($ cell) ($ cell) ($ cell))))
-  #_($ :p
-       ($ :h1 "tic tac toe")
-       ($ :table
-          ($ :tr ($ :td) ($ :td) ($ :td))
-          ($ :tr ($ :td) ($ :td) ($ :td))
-          ($ :tr ($ :td) ($ :td) ($ :td)))))
+  ($ :div {:style {:display "flex"}}
+     ($ :div "Player: X"
+        ($ :table {:style {:border-collapse "collapse"}}
+           ($ :tr ($ cell) ($ cell) ($ cell))
+           ($ :tr ($ cell) ($ cell) ($ cell))
+           ($ :tr ($ cell) ($ cell) ($ cell))))
+     ($ :ol
+        ($ :li ($ :button "test"))
+        ($ :li ($ :button "ppap")))))
 
 ;;
 (defonce root
