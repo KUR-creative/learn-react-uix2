@@ -49,16 +49,22 @@
      (map #($ :li {:key %}
               ($ :button %)) moves)))
 
+(defui game-status [{:keys [turn]}]
+  ;; Add who win
+  ($ :h3 (str "Player: " (clojure.string/capitalize turn))))
+
 (defui app []
   (let [[moves set-moves!] (uix/use-state init-moves)
         [board set-board!] (uix/use-state init-board)
-        [turn set-turn!] (uix/use-state "o")
+        [turn set-turn!] (uix/use-state "x")
         state {:moves moves :set-moves! set-moves!
                :board board :set-board! set-board!
                :turn turn :set-turn! set-turn!}]
-    ($ :div {:style {:display "flex"}}
-       ($ board-table {:state state})
-       ($ moves-list {:moves moves}))))
+    ($ :div
+       ($ game-status {:turn turn})
+       ($ :div {:style {:display "flex"}}
+          ($ board-table {:state state})
+          ($ moves-list {:moves moves})))))
 
 ;;
 (defonce root
