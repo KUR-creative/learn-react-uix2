@@ -4,14 +4,10 @@
    [uix.dom]))
 
 ;;
-(def turn-cycle (cycle [:x :o]))
-(def moves [])
-(def board (vec (repeat 9 "_")))
-
 (defn init-moves [] (vector))
 (defn init-board [] (vec (repeat 9 "_")))
-;(defn init-state [] {:moves (init-moves) :board (init-board)})
 
+(def next-turn {"o" "x", "x" "o"})
 (defn next-moves [moves pos]
   (conj moves pos))
 (defn next-board [board pos ox]
@@ -19,21 +15,23 @@
 (defn placeable? [board pos]
   (= (board pos) "_"))
 
+(defn set-next! [pos {:keys [moves set-moves!
+                             board set-board!
+                             turn set-turn!]}]
+  (when (placeable? board pos)
+    (prn pos) (prn moves)
+    (set-moves! (next-moves moves pos))
+    (set-board! (next-board board pos turn))
+    (set-turn! (next-turn turn))))
+
 ;;
-(defui cell [{ox :ox pos :pos
-              {:keys [moves set-moves! board set-board!]} :state}]
+(defui cell [{:keys [ox pos state]}]
   ($ :td {:key key
-          :on-click (fn []
-                      (when (placeable? board pos)
-                        (prn pos)
-                        (prn moves)
-                        (set-moves! (next-moves moves pos))))
+          :on-click #(set-next! pos state)
           :style {:border "1px solid black"
                   :font-size "xxx-large"
                   :padding "10px 20px"}}
-     (if (placeable? board pos)
-       ox
-       "_")))
+     ox))
 
 (defui board-table [{:keys [state]}]
   ($ :table {:style {:border-collapse "collapse"}}
@@ -52,8 +50,10 @@
 (defui app []
   (let [[moves set-moves!] (uix/use-state init-moves)
         [board set-board!] (uix/use-state init-board)
+        [turn set-turn!] (uix/use-state "o")
         state {:moves moves :set-moves! set-moves!
-               :board board :set-board! set-board!}]
+               :board board :set-board! set-board!
+               :turn turn :set-turn! set-turn!}]
     ($ :div {:style {:display "flex"}}
        ($ board-table {:state state})
        ($ moves-list {:moves moves}))))
