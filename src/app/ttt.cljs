@@ -62,7 +62,7 @@
                   :padding "10px 20px"}}
      ox))
 
-(defui board-table [{:keys [board set-board! n-move set-n-move!]}]
+(defui board-table [{{:keys [board set-board! n-move set-n-move!]} :state}]
   ($ :table {:style {:border-collapse "collapse"}}
      ($ :tbody
         (let [the-board (board-at board n-move)]
@@ -107,12 +107,13 @@
 
 (defui app []
   (let [[board set-board!] (uix/use-state new-board)
-        [n-move set-n-move!] (uix/use-state 0)]
+        [n-move set-n-move!] (uix/use-state 0)
+        state {:board board :set-board! set-board!
+               :n-move n-move :set-n-move! set-n-move!}]
     ($ :div
        ($ game-status {:board board :n-move n-move})
        ($ :div {:style {:display "flex"}}
-          ($ board-table {:board board :set-board! set-board!
-                          :n-move n-move :set-n-move! set-n-move!})
+          ($ board-table {:state state})
           ($ moves-ol {:board board
                        :n-move n-move :set-n-move! set-n-move!})))))
 
