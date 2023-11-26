@@ -30,7 +30,7 @@
   ([board]
    (print-board board identity)))
 
-(defui box [{:keys [ox]}]
+(defui cell-td [{:keys [ox]}]
   ($ :td {:key key
           :style {:border "1px solid black"
                   :font-size "xxx-large"
@@ -42,8 +42,8 @@
      ($ :tbody
         (->> board
              (map-indexed (fn [idx cell]
-                            ($ box {:ox (cell-ox cell) ;:pos idx 
-                                    :key idx})))
+                            ($ cell-td {:ox (cell-ox cell) ;:pos idx 
+                                        :key idx})))
              (partition 3)
              (map-indexed (fn [idx tds]
                             ($ :tr {:key idx} tds)))))))
