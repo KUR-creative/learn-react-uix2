@@ -23,6 +23,8 @@
 (defn cell-ox [cell]
   (ox (:ox cell)))
 
+(defn history [board]
+  (sort-by :no (filter :no board)))
 (defn latest-cell [board]
   (apply max-key :no (filter :no board)))
 (def next-player
@@ -64,6 +66,23 @@
              (map-indexed (fn [idx tds]
                             ($ :tr {:key idx} tds)))))))
 
+(defui move-li [{:keys [no]}]
+  ($ :li {:key no}
+     ($ :button
+        (str "Go to " (if (pos? no)
+                        (str "move #" no) ; (inc move-no)
+                        "game start")))))
+
+(defui moves-ol [{:keys [board set-board!]}]
+  (let [moves (history board)]
+    ($ :ol
+       (cons ($ move-li {:key -1 :no 0})
+             (map-indexed (fn [idx {no :no}]
+                            ($ move-li {:key idx :no no
+                                        ;:state state
+                                        }))
+                          moves)))))
+
 (defui game-status [{:keys [turn]}]
   ;; Add who win
   ($ :h3 (str "Player: " (if turn
@@ -76,7 +95,7 @@
        ($ game-status {:turn (-> board latest-cell :ox next-player)})
        ($ :div {:style {:display "flex"}}
           ($ board-table {:board board :set-board! set-board!})
-          #_($ moves-list {:state state})))))
+          ($ moves-ol {:board board :set-board! set-board!})))))
 
 
 ;;
@@ -102,4 +121,5 @@
   (next-player (-> (new-board) latest-cell :ox))
   (def board (place (place (new-board) 1 "x" 0)
                     5 "o" 1))
-  (next-player (-> (place board 0 "x" 2) latest-cell :ox)))
+  (next-player (-> (place board 0 "x" 2) latest-cell :ox))
+  (history (place board 0 "x" 2)))
