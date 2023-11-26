@@ -4,8 +4,9 @@
    [uix.dom]))
 
 ;;
+(def empty-cell {})
 (defn cell
-  ([] {})
+  ([] empty-cell)
   ([ox no] {:ox ox :no no}))
 
 (defn new-board []
@@ -33,6 +34,9 @@
    "x" "o"})
 
 ;;
+(defn board-at [board n-move]
+  (mapv #(if (<= (:no %) n-move) % empty-cell) board))
+
 (defn print-board
   ([board view]
    (let [rows (partition 3 board)]
@@ -41,26 +45,29 @@
   ([board]
    (print-board board identity)))
 
-(defui cell-td [{:keys [ox pos board set-board!]}]
+(defui cell-td [{:keys [ox pos board set-board! n-move set-n-move!]}]
   ($ :td {:key key
-          :on-click #(when (placeable? board pos)
-                       (let [{now-ox :ox no :no} (latest-cell board)]
+          :on-click #(let [the-board (board-at board n-move)
+                           {now-ox :ox no :no} (latest-cell board)]
+                       (when (placeable? the-board pos)
                          (set-board! (place board pos
                                             (next-player now-ox)
                                             (inc no)))
-                         (print-board board)))
+                         (set-n-move! (inc n-move))
+                         (print-board board :no)))
           :style {:border "1px solid black"
                   :font-size "xxx-large"
                   :padding "10px 20px"}}
      ox))
 
-(defui board-table [{:keys [board set-board!]}]
+(defui board-table [{:keys [board set-board! n-move set-n-move!]}]
   ($ :table {:style {:border-collapse "collapse"}}
      ($ :tbody
         (->> board
              (map-indexed (fn [idx cell]
                             ($ cell-td {:ox (cell-ox cell) :pos idx
                                         :board board :set-board! set-board!
+                                        :n-move n-move :set-n-move! set-n-move!
                                         :key idx})))
              (partition 3)
              (map-indexed (fn [idx tds]
@@ -74,7 +81,8 @@
                         "game start")))))
 
 (defui moves-ol [{:keys [board set-board!]}]
-  (let [moves (history board)]
+  (let [moves (history board)
+        _ (def board board)]
     ($ :ol
        (cons ($ move-li {:key -1 :no 0})
              (map-indexed (fn [idx {no :no}]
@@ -90,11 +98,13 @@
                            "nil? wtf?"))))
 
 (defui app []
-  (let [[board set-board!] (uix/use-state new-board)]
+  (let [[board set-board!] (uix/use-state new-board)
+        [n-move set-n-move!] (uix/use-state 0)]
     ($ :div
        ($ game-status {:turn (-> board latest-cell :ox next-player)})
        ($ :div {:style {:display "flex"}}
-          ($ board-table {:board board :set-board! set-board!})
+          ($ board-table {:board board :set-board! set-board!
+                          :n-move n-move :set-n-move! set-n-move!})
           ($ moves-ol {:board board :set-board! set-board!})))))
 
 
@@ -122,4 +132,10 @@
   (def board (place (place (new-board) 1 "x" 0)
                     5 "o" 1))
   (next-player (-> (place board 0 "x" 2) latest-cell :ox))
-  (history (place board 0 "x" 2)))
+  (history (place board 0 "x" 2))
+  (def board (place board 0 "x" 2))
+
+  (def n-move 1)
+  (board-at board 0)
+  (board-at board 1)
+  (board-at board 2))
