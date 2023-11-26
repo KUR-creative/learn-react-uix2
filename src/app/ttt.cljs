@@ -51,10 +51,10 @@
   (some #(when (apply = %) (first %))
         (win-candidates vec9)))
 
-;;
 (defn board-at [board n-move]
   (mapv #(if (<= (:no %) n-move) % empty-cell) board))
 
+;;
 (defn print-board
   ([board view]
    (let [rows (partition 3 board)]
@@ -71,11 +71,7 @@
                          (set-board! (place board pos
                                             (next-player now-ox)
                                             (inc no)))
-                         (set-n-move! (inc n-move))
-                         (prn n-move)
-                         (print-board board (fn [c] (if (:ox c)
-                                                      (:ox c)
-                                                      "_")))))
+                         (set-n-move! (inc n-move))))
           :style {:border "1px solid black"
                   :font-size "xxx-large"
                   :padding "10px 20px"}}
@@ -97,26 +93,21 @@
                (map-indexed (fn [idx tds]
                               ($ :tr {:key idx} tds))))))))
 
-(defui move-li [{:keys [no n-move set-n-move!]}]
+(defui move-li [{:keys [no set-n-move!]}]
   ($ :li {:key no}
-     ($ :button {:on-click (fn []
-                             (prn ">" no n-move)
-                             (set-n-move! no))}
+     ($ :button {:on-click #(set-n-move! no)}
         (str "Go to " (if (pos? no)
-                        (str "move #" no) ; (inc move-no)
+                        (str "move #" no)
                         "game start")))))
 
 (defui moves-ol [{:keys [board n-move set-n-move!]}]
-  (let [moves (history board)
-        _ (def board board)]
+  (let [moves (history board)]
     ($ :ol
        (cons ($ move-li {:key -1 :no 0
                          :n-move n-move :set-n-move! set-n-move!})
              (map-indexed (fn [idx {no :no}]
                             ($ move-li {:key idx :no no
-                                        :n-move n-move :set-n-move! set-n-move!
-                                        ;:state state
-                                        }))
+                                        :n-move n-move :set-n-move! set-n-move!}))
                           moves)))))
 
 (defui game-status [{:keys [board n-move]}]
@@ -143,7 +134,6 @@
           ($ moves-ol {:board board
                        :n-move n-move :set-n-move! set-n-move!})))))
 
-
 ;;
 (defonce root
   (uix.dom/create-root (js/document.getElementById "root")))
@@ -151,8 +141,7 @@
 (defn render []
   (uix.dom/render-root ($ app) root))
 
-(defn ^:export init [] ;; export, but default?
-  ;; https://javascript.info/import-export
+(defn ^:export init []
   (render))
 
 ;;
