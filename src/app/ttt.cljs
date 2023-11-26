@@ -47,14 +47,16 @@
 
 (defui cell-td [{:keys [ox pos board set-board! n-move set-n-move!]}]
   ($ :td {:key key
-          :on-click #(let [the-board (board-at board n-move)
-                           {now-ox :ox no :no} (latest-cell board)]
-                       (when (placeable? the-board pos)
+          :on-click #(let [{now-ox :ox no :no} (latest-cell board)]
+                       (when (placeable? board pos)
                          (set-board! (place board pos
                                             (next-player now-ox)
                                             (inc no)))
                          (set-n-move! (inc n-move))
-                         (print-board board :no)))
+                         (prn n-move)
+                         (print-board board (fn [c] (if (:ox c)
+                                                      (:ox c)
+                                                      "_")))))
           :style {:border "1px solid black"
                   :font-size "xxx-large"
                   :padding "10px 20px"}}
@@ -63,49 +65,56 @@
 (defui board-table [{:keys [board set-board! n-move set-n-move!]}]
   ($ :table {:style {:border-collapse "collapse"}}
      ($ :tbody
-        (->> board
-             (map-indexed (fn [idx cell]
-                            ($ cell-td {:ox (cell-ox cell) :pos idx
-                                        :board board :set-board! set-board!
-                                        :n-move n-move :set-n-move! set-n-move!
-                                        :key idx})))
-             (partition 3)
-             (map-indexed (fn [idx tds]
-                            ($ :tr {:key idx} tds)))))))
+        (let [the-board (board-at board n-move)]
+          (->> the-board
+               (map-indexed (fn [idx cell]
+                              ($ cell-td {:ox (cell-ox cell) :pos idx
+                                          :board the-board :set-board! set-board!
+                                          :n-move n-move :set-n-move! set-n-move!
+                                          :key idx})))
+               (partition 3)
+               (map-indexed (fn [idx tds]
+                              ($ :tr {:key idx} tds))))))))
 
-(defui move-li [{:keys [no]}]
+(defui move-li [{:keys [no n-move set-n-move!]}]
   ($ :li {:key no}
-     ($ :button
+     ($ :button {:on-click (fn []
+                             (prn ">" no n-move)
+                             (set-n-move! no))}
         (str "Go to " (if (pos? no)
                         (str "move #" no) ; (inc move-no)
                         "game start")))))
 
-(defui moves-ol [{:keys [board set-board!]}]
+(defui moves-ol [{:keys [board n-move set-n-move!]}]
   (let [moves (history board)
         _ (def board board)]
     ($ :ol
-       (cons ($ move-li {:key -1 :no 0})
+       (cons ($ move-li {:key -1 :no 0
+                         :n-move n-move :set-n-move! set-n-move!})
              (map-indexed (fn [idx {no :no}]
                             ($ move-li {:key idx :no no
+                                        :n-move n-move :set-n-move! set-n-move!
                                         ;:state state
                                         }))
                           moves)))))
 
-(defui game-status [{:keys [turn]}]
+(defui game-status [{:keys [board n-move]}]
   ;; Add who win
-  ($ :h3 (str "Player: " (if turn
-                           (clojure.string/capitalize turn)
-                           "nil? wtf?"))))
+  (let [turn (-> (board-at board n-move) latest-cell :ox next-player)]
+    ($ :h3 (str "Player: " (if turn
+                             (clojure.string/capitalize turn)
+                             "nil? wtf?")))))
 
 (defui app []
   (let [[board set-board!] (uix/use-state new-board)
         [n-move set-n-move!] (uix/use-state 0)]
     ($ :div
-       ($ game-status {:turn (-> board latest-cell :ox next-player)})
+       ($ game-status {:board board :n-move n-move})
        ($ :div {:style {:display "flex"}}
           ($ board-table {:board board :set-board! set-board!
                           :n-move n-move :set-n-move! set-n-move!})
-          ($ moves-ol {:board board :set-board! set-board!})))))
+          ($ moves-ol {:board board
+                       :n-move n-move :set-n-move! set-n-move!})))))
 
 
 ;;
@@ -138,4 +147,5 @@
   (def n-move 1)
   (board-at board 0)
   (board-at board 1)
-  (board-at board 2))
+  (board-at board 2)
+  (print-board (board-at board 6) #(ox (:ox %))))
