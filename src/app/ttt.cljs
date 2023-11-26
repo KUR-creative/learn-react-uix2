@@ -33,6 +33,23 @@
    "o" "x"
    "x" "o"})
 
+(defn rowify [vec9]
+  (->> vec9
+       (partition 3)
+       (map vec)
+       vec))
+(defn colify [rows]
+  (apply map vector rows))
+(defn diagonals [vec9]
+  [[(vec9 0) (vec9 4) (vec9 8)]
+   [(vec9 2) (vec9 4) (vec9 6)]])
+(defn win-candidates [vec9]
+  (let [rows (rowify vec9)]
+    (concat rows (colify rows) (diagonals vec9))))
+(defn winner [vec9]
+  (some #(when (apply = %) (first %))
+        (win-candidates vec9)))
+
 ;;
 (defn board-at [board n-move]
   (mapv #(if (<= (:no %) n-move) % empty-cell) board))
@@ -149,4 +166,32 @@
   (board-at board 0)
   (board-at board 1)
   (board-at board 2)
-  (print-board (board-at board 6) #(ox (:ox %))))
+  (print-board (board-at board 6) #(ox (:ox %)))
+
+  (some #(when (apply = %) %) (partition 3 [0 1 0
+                                            1 1 0
+                                            1 1 2]))
+  (rowify [1 2 3
+           0 0 0
+           4 5 6])
+  (colify (rowify [1 2 3
+                   0 0 0
+                   4 5 6]))
+  (diagonals [1 2 3
+              0 0 0
+              4 5 6])
+  (winner [1 2 3
+           0 0 0
+           4 5 6])
+  (winner [1 2 3
+           1 0 0
+           1 5 6])
+  (winner [7 2 3
+           1 1 0
+           1 5 7])
+  (winner [7 2 3
+           1 7 0
+           1 5 7])
+  (win-candidates [1 2 3
+                   1 0 0
+                   1 5 6]))
