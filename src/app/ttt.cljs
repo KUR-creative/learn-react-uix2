@@ -1,5 +1,6 @@
 (ns app.ttt
   (:require
+   [clojure.string :refer [capitalize]]
    [uix.core :as uix :refer [defui $]]
    [uix.dom]))
 
@@ -117,10 +118,15 @@
 
 (defui game-status [{:keys [board n-move]}]
   ;; Add who win
-  (let [turn (-> (board-at board n-move) latest-cell :ox next-player)]
-    ($ :h3 (str "Player: " (if turn
-                             (clojure.string/capitalize turn)
-                             "nil? wtf?")))))
+  (let [the-board (board-at board n-move)
+        a-winner (winner (mapv :ox the-board))
+        turn (-> the-board latest-cell :ox next-player)]
+    ($ :h3
+       (if a-winner
+         (str "Winner: " (capitalize a-winner))
+         (str "Player: " (if turn
+                           (capitalize turn)
+                           "nil? wtf?"))))))
 
 (defui app []
   (let [[board set-board!] (uix/use-state new-board)
@@ -192,6 +198,13 @@
   (winner [7 2 3
            1 7 0
            1 5 7])
+  (winner [1 1 1
+           1 3 nil
+           nil nil nil])
+
+  (winner [nil nil nil
+           1 1 1
+           1 3 nil])
   (win-candidates [1 2 3
                    1 0 0
                    1 5 6]))
