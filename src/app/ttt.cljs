@@ -63,10 +63,11 @@
   ([board]
    (print-board board identity)))
 
-(defui cell-td [{:keys [ox pos board set-board! n-move set-n-move!]}]
+(defui cell-td [{:keys [ox pos a-winner
+                        board set-board! n-move set-n-move!]}]
   ($ :td {:key key
           :on-click #(let [{now-ox :ox no :no} (latest-cell board)]
-                       (when (placeable? board pos)
+                       (when (and (not a-winner) (placeable? board pos))
                          (set-board! (place board pos
                                             (next-player now-ox)
                                             (inc no)))
@@ -83,10 +84,12 @@
 (defui board-table [{{:keys [board set-board! n-move set-n-move!]} :state}]
   ($ :table {:style {:border-collapse "collapse"}}
      ($ :tbody
-        (let [the-board (board-at board n-move)]
+        (let [the-board (board-at board n-move)
+              a-winner (winner (mapv :ox the-board))]
           (->> the-board
                (map-indexed (fn [idx cell]
                               ($ cell-td {:ox (cell-ox cell) :pos idx
+                                          :a-winner a-winner
                                           :board the-board :set-board! set-board!
                                           :n-move n-move :set-n-move! set-n-move!
                                           :key idx})))
