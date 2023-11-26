@@ -11,13 +11,15 @@
 (defn new-board []
   (vec (repeatedly 9 cell)))
 
-(defn place [board idx ox no]
-  (assoc board idx (cell ox no)))
+(defn place [board pos ox no]
+  (assoc board pos (cell ox no)))
 
 (defn ox [v]
   (if v
     v
     "_"))
+(defn cell-ox [cell]
+  (ox (:ox cell)))
 
 ;;
 (defn print-board
@@ -28,8 +30,30 @@
   ([board]
    (print-board board identity)))
 
+(defui box [{:keys [ox]}]
+  ($ :td {:key key
+          :style {:border "1px solid black"
+                  :font-size "xxx-large"
+                  :padding "10px 20px"}}
+     ox))
+
+(defui board-table [{:keys [board]}]
+  ($ :table {:style {:border-collapse "collapse"}}
+     ($ :tbody
+        (->> board
+             (map-indexed (fn [idx cell]
+                            ($ box {:ox (cell-ox cell) ;:pos idx 
+                                    :key idx})))
+             (partition 3)
+             (map-indexed (fn [idx tds]
+                            ($ :tr {:key idx} tds)))))))
+
 (defui app []
-  ($ :h1 "ppap"))
+  ($ :div
+     #_($ game-status {:turn turn})
+     ($ :div {:style {:display "flex"}}
+        ($ board-table {:board (new-board)})
+        #_($ moves-list {:state state}))))
 
 
 ;;
