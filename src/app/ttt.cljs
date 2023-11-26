@@ -49,11 +49,12 @@
                             ($ :tr {:key idx} tds)))))))
 
 (defui app []
-  ($ :div
-     #_($ game-status {:turn turn})
-     ($ :div {:style {:display "flex"}}
-        ($ board-table {:board (new-board)})
-        #_($ moves-list {:state state}))))
+  (let [[board set-board!] (uix/use-state new-board)]
+    ($ :div
+       #_($ game-status {:turn turn})
+       ($ :div {:style {:display "flex"}}
+          ($ board-table {:board board})
+          #_($ moves-list {:state state})))))
 
 
 ;;
