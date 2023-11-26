@@ -45,7 +45,8 @@
                        (let [{now-ox :ox no :no} (latest-cell board)]
                          (set-board! (place board pos
                                             (next-player now-ox)
-                                            (inc no)))))
+                                            (inc no)))
+                         (print-board board)))
           :style {:border "1px solid black"
                   :font-size "xxx-large"
                   :padding "10px 20px"}}
@@ -63,10 +64,16 @@
              (map-indexed (fn [idx tds]
                             ($ :tr {:key idx} tds)))))))
 
+(defui game-status [{:keys [turn]}]
+  ;; Add who win
+  ($ :h3 (str "Player: " (if turn
+                           (clojure.string/capitalize turn)
+                           "nil? wtf?"))))
+
 (defui app []
   (let [[board set-board!] (uix/use-state new-board)]
     ($ :div
-       #_($ game-status {:turn turn})
+       ($ game-status {:turn (-> board latest-cell :ox next-player)})
        ($ :div {:style {:display "flex"}}
           ($ board-table {:board board :set-board! set-board!})
           #_($ moves-list {:state state})))))
